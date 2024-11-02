@@ -1,0 +1,15 @@
+hostname: owntone
+ansible_host: <IP_ADDRESS>
+ansible_python_interpreter: /usr/bin/python3.12
+
+users:
+ - name: ansible
+   groups: "wheel"
+   shell: "/bin/bash"
+   public_keys: 
+    - "<SSH_PUB_KEY>"
+ - name: owntone
+   groups: "wheel,audio"
+   shell: "/bin/bash"
+   public_keys: 
+    - "<SSH_PUB_KEY>"

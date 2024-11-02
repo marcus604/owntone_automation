@@ -1,0 +1,12 @@
+---
+- name: Configure Owntone host
+  hosts: owntone
+  become: true
+  pre_tasks:
+    - name: Validate cloud-init completed
+      ansible.builtin.include_tasks: tasks/check_cloud-init.yml
+    - name: Change hostname
+      ansible.builtin.include_tasks: tasks/hostname.yml
+  roles:
+    - role: users
+    - role: owntone
