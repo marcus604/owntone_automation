@@ -49,7 +49,7 @@ resource "proxmox_virtual_environment_vm" "owntone" {
 
   network_device {
     bridge      = "vmbr0"
-    mac_address = "02:00:00:00:01:00"
+    mac_address = var.owntone_mac_address
   }
 
   usb {

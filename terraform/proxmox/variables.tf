@@ -34,3 +34,7 @@ variable "timezone" {
 variable "owntone_audio_in_usb_mapping" {
   type = string
 }
+
+variable "owntone_mac_address" {
+  type = string
+}
