@@ -2,9 +2,12 @@
 - name: Configure Owntone host
   hosts: owntone
   become: true
+  vars:
+    no_cloud: false
   pre_tasks:
     - name: Validate cloud-init completed
       ansible.builtin.include_tasks: tasks/check_cloud-init.yml
+      when: not no_cloud
     - name: Change hostname
       ansible.builtin.include_tasks: tasks/hostname.yml
   roles:
