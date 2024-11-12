@@ -1,0 +1,41 @@
+---
+- name: Make sure we have a 'wheel' group
+  ansible.builtin.group:
+    name: wheel
+    state: present
+
+- name: Allow 'wheel' group to have passwordless sudo
+  ansible.builtin.lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: visudo -cf %s
+
+- name: Create users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    state: present
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    groups: "{{ item.groups | default('') }}"
+    uid: "{{ item.uid | default(omit) }}"
+    password: "{{ item.password | default(omit) }}"
+  loop: "{{ users }}"
+  when: users | length > 0
+
+- name: Create .ssh directory for users
+  ansible.builtin.file:
+    path: "/home/{{ item.name }}/.ssh"
+    state: directory
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: '0700'
+  loop: "{{ users }}"
+
+- name: Add public keys to authorized_keys
+  ansible.posix.authorized_key:
+    user: "{{ item.0.name }}"
+    state: present
+    key: "{{ item.1 }}"
+  loop: "{{ users | subelements('public_keys') }}"
+  when: item.1 is defined

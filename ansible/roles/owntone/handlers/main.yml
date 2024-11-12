@@ -1,0 +1,9 @@
+- name: Restart Owntone service
+  ansible.builtin.service:
+    name: owntone
+    state: restarted
+
+- name: Reboot server
+  ansible.builtin.reboot:
+    msg: "Rebooting server as part of playbook changes."
+    reboot_timeout: 60

@@ -1,0 +1,113 @@
+---
+- name: Install packages
+  ansible.builtin.include_role:
+    name: packages
+  vars:
+    packages: "{{ owntone_packages }}" # noqa: var-naming[no-role-prefix]
+
+- name: Install linux-modules-extra
+  ansible.builtin.package:
+    name: "linux-modules-extra-{{ ansible_kernel }}"
+    state: present
+
+- name: Set snd-usb-audio to load on boot
+  ansible.builtin.lineinfile:
+    path: /etc/modules
+    line: "snd-usb-audio"
+    state: present
+  notify: Reboot server
+
+- name: Create /srv/music directory
+  ansible.builtin.file:
+    path: /srv/music
+    state: directory
+    owner: "{{ owntone_user }}"
+    group: "{{ owntone_user }}"
+    mode: '0755'
+
+- name: Create record_player FIFO
+  ansible.builtin.command:
+    cmd: "mkfifo -m 666 {{ owntone_fifo_path }}/{{ owntone_fifo_name }}"
+    creates: "{{ owntone_fifo_path }}/{{ owntone_fifo_name }}"
+
+- name: Check if owntone service is installed
+  ansible.builtin.service_facts:
+
+- name: Install Owntone server
+  when: "'owntone.service' not in ansible_facts.services"
+  block:
+    - name: Clone Owntone server repository # noqa: latest
+      ansible.builtin.git:
+        repo: https://github.com/owntone/owntone-server.git
+        version: HEAD
+        dest: /tmp/owntone-server
+        update: true
+
+    - name: Run autoreconf
+      ansible.builtin.command: autoreconf -i
+      args:
+        chdir: /tmp/owntone-server
+      changed_when: true
+
+    - name: Configure Owntone
+      ansible.builtin.command: ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-install-user --disable-spotify
+      args:
+        chdir: /tmp/owntone-server
+      changed_when: true
+
+    - name: Compile Owntone
+      ansible.builtin.make:
+        chdir: /tmp/owntone-server
+
+    - name: Install Owntone
+      ansible.builtin.make:
+        chdir: /tmp/owntone-server
+        target: install
+
+- name: Copy custom owntone.conf to server
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/owntone.conf"
+    dest: /etc/owntone.conf
+    owner: "{{ owntone_user }}"
+    group: "{{ owntone_user }}"
+    mode: '0644'
+  notify: Restart Owntone service
+
+- name: Enable Owntone service to start on boot
+  ansible.builtin.systemd:
+    name: owntone
+    enabled: true
+    state: started
+  notify: Reboot server
+
+- name: Create systemd service file for play_audio_in
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/play_audio_in.service
+    content: |
+      [Unit]
+      Description=Capture audio from audio in to owntone monitored pipe
+      After=sound.target
+
+      [Service]
+      ExecStart=/bin/sh -c "arecord -D hw:{{ owntone_audio_in_card }},{{ owntone_audio_in_device }} \
+              -c {{ owntone_num_of_channels }} -f {{ owntone_format }} \
+              -r {{ owntone_rate }} \
+              -d 0 \
+              -t raw > {{ owntone_fifo_path }}/{{ owntone_fifo_name }}"
+      Restart=always
+      RestartSec=5
+      User={{ owntone_user }}
+
+      [Install]
+      WantedBy=multi-user.target
+    mode: '0644'
+
+- name: Reload systemd to apply changes
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Enable and start play_audio_in service
+  ansible.builtin.systemd:
+    name: play_audio_in.service
+    enabled: true
+    state: started

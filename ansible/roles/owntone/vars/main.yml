@@ -1,0 +1,43 @@
+owntone_user: owntone
+owntone_audio_in_card: <CARD_NUM>
+owntone_audio_in_device: <DEVICE_NUM>
+owntone_num_of_channels: <NUM_OF_CHANNELS>
+owntone_format: <FORMAT>
+owntone_rate: <RATE>
+owntone_fifo_path: /srv/music
+owntone_fifo_name: record_player
+owntone_packages:
+  - alsa-utils
+  - git
+  - avahi-daemon
+  - build-essential
+  - git
+  - autotools-dev
+  - autoconf
+  - automake
+  - libtool
+  - gettext
+  - gawk
+  - gperf
+  - bison
+  - flex
+  - libconfuse-dev
+  - libunistring-dev
+  - libsqlite3-dev
+  - libavcodec-dev
+  - libavformat-dev
+  - libavfilter-dev
+  - libswscale-dev
+  - libavutil-dev
+  - libasound2-dev
+  - libxml2-dev
+  - libgcrypt20-dev
+  - libavahi-client-dev
+  - zlib1g-dev
+  - libevent-dev
+  - libplist-dev
+  - libsodium-dev
+  - libjson-c-dev
+  - libwebsockets-dev
+  - libcurl4-openssl-dev
+  - libprotobuf-c-dev

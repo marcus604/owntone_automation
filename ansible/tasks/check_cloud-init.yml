@@ -1,0 +1,10 @@
+---
+# This can fail if the cloud-init includes a restart and this task is started prior
+# Ansible does not have a good pattern to solve this, re-run the playbook if encountered
+- name: Wait for cloud init to finish
+  community.general.cloud_init_data_facts:
+    filter: status
+  register: res
+  until: "res.cloud_init_data_facts.status.v1.stage is defined and not res.cloud_init_data_facts.status.v1.stage"
+  retries: 10
+  delay: 30

@@ -1,0 +1,11 @@
+- name: Update package list and install latest versions
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: dist
+  when: ansible_os_family == "Debian"
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ packages }}"
+    state: present
+  when: packages is defined
