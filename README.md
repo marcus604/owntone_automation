@@ -1,7 +1,11 @@
 # Owntone Server Automation
 This project provides terraform and ansible resources to fully automate the setup of an [Owntone server](https://github.com/owntone/owntone-server). **The configuration is designed specifically to capture line-in audio from a source, like a record player, and stream it to any compatible AirPlay device.**
 
-This was built around my own hardware and setup but many things are set by variables so it should be adaptable for your own hardware and setup. Feel free to open an issue if there is something that doesnt work or is not needed and I can parameterize it. 
+This was built around my own hardware and setup but many things are set by variables so it should be adaptable for your own hardware and setup. Feel free to open an issue if there is something that doesnt work or is not needed and I can parameterize it.
+
+## Credit
+
+Huge credit to the [Owntone team](https://github.com/owntone/owntone-server) for all the development work as this project obviously would not be possible. Also extra shoutout to their documentation which made configuring all this much much easier.
 
 ## Prequisities
 
@@ -35,9 +39,6 @@ This was built around my own hardware and setup but many things are set by varia
 4. Your device may have a different description, if you can't determine which it is then unplug and run `lsusb` to compare the outputs
 5. Grab the map ID's, in the above its `534d:0021`
 
-
-
-
 ## Terraform/Proxmox Setup - Skip to the Ansible setup if you arent using proxmox or dont want to use terraform to generate the VM and its required resources
 
 1. Populate the `proxmox.tfvars` file with your environment details. Follow the [terraform docs for the bpg proxmox provider](https://registry.terraform.io/providers/bpg/proxmox/latest/docs) for more in depth details
@@ -69,7 +70,6 @@ This ansible playbook will
 * Install and configure Owntone to load on boot
 * Install service to always pipe audio to Owntone on boot
 
-
 ### Owntone Installation
 Downloads and installs Owntone from source. This step prepares Owntone to run with minimal extras.
 
@@ -88,10 +88,19 @@ Copies a custom Owntone settings file to `/etc/owntone.conf` with specific confi
 
 At this point you should have a VM/container/host that you can SSH into with the `ansible` user with the ssh key you provided and the audio capture card should be detectable which you can test using the `lsusb` command
 
-1.  Populate your `host_vars/owntone` file with the IP address of your host and the ssh key(s)
+1.  Populate your `host_vars/owntone` file
+    - ip address of host
+    - ssh key
+    - owntone_audio_in_card: <CARD_NUM>   # e.g., 0 for the first sound card
+    - owntone_audio_in_device: <DEVICE_NUM>
+    - owntone_num_of_channels: <NUM_OF_CHANNELS>
+    - owntone_format: `<FORMAT>`
+    - owntone_rate: <RATE>with the IP address of your host and the ssh key(s)
 2. Update the `roles/owntone/files/owntone.conf` for your environment
     1. `pipe_sample_rate` - If your audio is slow/fast/garbled you likely need to update this for your card. Check your cards hardware parameters `cat card<NUM>/pcm0c/sub0/hw_params`
     2. Check the [Owntone Docs](https://owntone.github.io/owntone-server/configuration/) for all available settings
+3. Populate your `roles/owntone/vars/main.yml` with
+    
 
 
 ## Ansible Usage
@@ -110,13 +119,12 @@ The default run waits for cloud-init tasks to be done. If you are not using clou
     ansible-playbook -i inventory owntone-site.yml -e "no_cloud=true"
     ```
 
-# Troubleshooting Guide
-
+## Troubleshooting Guide
 If you're having trouble getting your setup to work, here are some steps to help you troubleshoot common issues.
 
----
 
-## 1. Check USB Audio Device Detection
+
+### 1. Check USB Audio Device Detection
 
 Ensure your USB audio device is recognized by the system:
 
@@ -127,7 +135,7 @@ lsusb
 - Look for your device’s **Vendor ID** and **Product ID** in the output.
 - If your device doesn’t appear, try reconnecting it or using a different USB port.
 
-## 2. Verify Device Visibility for Owntone User
+### 2. Verify Device Visibility for Owntone User
 
 Check that the `owntone` user has access to the audio device:
 
@@ -138,7 +146,7 @@ sudo -u owntone arecord -l
 - This command lists available audio capture devices for the `owntone` user.
 - Confirm that your device is listed. If it’s not, verify the `owntone` user has appropriate permissions or check for device driver issues.
 
-## 3. Test Owntone Audio Playback
+### 3. Test Owntone Audio Playback
 
 To make sure Owntone can play audio, upload a test audio file to your Owntone media directory:
 
@@ -156,7 +164,7 @@ If you think its a playbook related issue by all means open an issue or even bet
 
 ---
 
-# Usage
+## Usage
 
 1. Browse to either `https://owntone.local:3689` or use your Owntone servers ip `https://<IP_ADDRESS>:3689`
 2. Navigate to `Settings` and select `Remotes and Outputs` 

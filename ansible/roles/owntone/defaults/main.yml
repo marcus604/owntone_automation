@@ -1,0 +1,8 @@
+owntone_audio_in_card: 0
+owntone_audio_in_device: 0
+owntone_num_of_channels: 2
+owntone_format: S16_LE
+owntone_rate: 48000
+owntone_fifo_path: /srv/music
+owntone_user: owntone
+owntone_fifo_name: record_player

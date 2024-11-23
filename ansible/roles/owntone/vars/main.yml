@@ -1,11 +1,3 @@
-owntone_user: owntone
-owntone_audio_in_card: <CARD_NUM>
-owntone_audio_in_device: <DEVICE_NUM>
-owntone_num_of_channels: <NUM_OF_CHANNELS>
-owntone_format: <FORMAT>
-owntone_rate: <RATE>
-owntone_fifo_path: /srv/music
-owntone_fifo_name: record_player
 owntone_packages:
   - alsa-utils
   - git
