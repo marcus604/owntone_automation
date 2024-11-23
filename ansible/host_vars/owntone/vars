@@ -1,5 +1,5 @@
 hostname: owntone
-ansible_host: <IP_ADDRESS>
+ansible_host: <IP_ADDRESS>                      # e.g., 10.10.10.45
 ansible_python_interpreter: /usr/bin/python3.12
 
 users:
@@ -7,9 +7,15 @@ users:
    groups: "wheel"
    shell: "/bin/bash"
    public_keys: 
-    - "<SSH_PUB_KEY>"
+    - "<SSH_PUB_KEY>"                           # e.g., ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN/GtO6SL1nFlm8hF/etcVK4e8zqJWlZBh08z5mNmZPv
  - name: owntone
    groups: "wheel,audio"
    shell: "/bin/bash"
    public_keys: 
     - "<SSH_PUB_KEY>"
+
+owntone_audio_in_card: <CARD_NUM>               # e.g., 0 
+owntone_audio_in_device: <DEVICE_NUM>           # e.g., 0 
+owntone_num_of_channels: <NUM_OF_CHANNELS>      # e.g., 2
+owntone_format: <FORMAT>                        # e.g., S16_LE for 16-bit little-endian
+owntone_rate: <RATE>                            # e.g., 48000 for 48kHz sample rate
